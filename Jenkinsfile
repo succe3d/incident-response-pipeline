@@ -6,14 +6,19 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
-                git credentialsId: 'github-credentials', url: 'https://github.com/succe3d/incident-response-pipeline.git'
+                git branch: 'main', url: 'https://github.com/succe3d/incident-response-pipeline.git', credentialsId: 'github-credentials'
             }
         }
         stage('Deploy Infrastructure') {
             steps {
                 sh 'cd terraform && terraform init && terraform apply -auto-approve'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install boto3'
             }
         }
         stage('Run Incident Detection') {
