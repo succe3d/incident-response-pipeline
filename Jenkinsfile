@@ -8,25 +8,17 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/yourusername/incident-response-pipeline.git'
+                git credentialsId: 'github-credentials', url: 'https://github.com/succe3d/incident-response-pipeline.git'
             }
         }
         stage('Deploy Infrastructure') {
             steps {
-                sh 'terraform init'
-                sh 'terraform apply -auto-approve'
+                sh 'cd terraform && terraform init && terraform apply -auto-approve'
             }
         }
         stage('Run Incident Detection') {
             steps {
-                script {
-                    // Simulate incident detection
-                    def incidentDetected = true
-                    if (incidentDetected) {
-                        // Invoke Lambda function for incident response
-                        sh 'aws lambda invoke --function-name incidentHandler output.txt'
-                    }
-                }
+                sh 'python3 incident_detector.py'
             }
         }
     }
