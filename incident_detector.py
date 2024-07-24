@@ -9,7 +9,7 @@ client = boto3.client('logs')
 log_group_name = '/aws/lambda/incident_logs'
 
 # Specify your AWS region
-region = 'us-east-1'
+region = 'us-west-2'
 
 client = boto3.client('logs', region_name=region)
 
