@@ -1,39 +1,19 @@
 import boto3
-import time
-import logging
-
-logging.basicConfig(level=logging.INFO)
-
-def create_log_group_and_stream(client, log_group_name, log_stream_name):
-    try:
-        client.create_log_group(logGroupName=log_group_name)
-        logging.info(f"Log group {log_group_name} created.")
-    except client.exceptions.ResourceAlreadyExistsException:
-        logging.info(f"Log group {log_group_name} already exists.")
-
-    try:
-        client.create_log_stream(logGroupName=log_group_name, logStreamName=log_stream_name)
-        logging.info(f"Log stream {log_stream_name} created.")
-    except client.exceptions.ResourceAlreadyExistsException:
-        logging.info(f"Log stream {log_stream_name} already exists.")
 
 def log_incident():
-    client = boto3.client('logs')
-    log_group_name = 'incident-response-log-group'
-    log_stream_name = 'incident-response-log-stream'
+    # Specify the region
+    client = boto3.client('logs', region_name='us-west-2')
+    
+    # Your existing logic here
+    log_group_name = '/aws/lambda/incident_logs'
+    log_stream_name = 'incident_log_stream'
 
-    create_log_group_and_stream(client, log_group_name, log_stream_name)
-
-    response = client.put_log_events(
+    response = client.create_log_stream(
         logGroupName=log_group_name,
-        logStreamName=log_stream_name,
-        logEvents=[
-            {
-                'timestamp': int(round(time.time() * 1000)),
-                'message': 'Sample incident detected and logged.'
-            },
-        ]
+        logStreamName=log_stream_name
     )
-    logging.info("Log event put to CloudWatch.")
 
-log_incident()
+    print(response)
+
+if __name__ == "__main__":
+    log_incident()
