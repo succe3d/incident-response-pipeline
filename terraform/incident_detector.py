@@ -1,4 +1,5 @@
 import boto3
+import time
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -31,8 +32,7 @@ def log_incident():
                 'timestamp': int(round(time.time() * 1000)),
                 'message': 'Sample incident detected and logged.'
             },
-        ],
-        sequenceToken='YOUR_SEQUENCE_TOKEN'
+        ]
     )
     logging.info("Log event put to CloudWatch.")
 
