@@ -1,10 +1,9 @@
 provider "aws" {
-  region = "us-west-2"
+  region = "us-east-2"
 }
 
 resource "aws_cloudwatch_log_group" "incident_log_group" {
   name = "incident-response-log-group"
-  retention_in_days = 14
 }
 
 resource "aws_cloudwatch_log_stream" "incident_log_stream" {
@@ -12,65 +11,53 @@ resource "aws_cloudwatch_log_stream" "incident_log_stream" {
   log_group_name = aws_cloudwatch_log_group.incident_log_group.name
 }
 
-resource "aws_iam_role" "lambda_role" {
+resource "aws_iam_role" "lambda_exec_role" {
   name = "lambda_exec_role"
-
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
       },
-    ]
+      "Effect": "Allow",
+      "Sid": ""
+    }]
   })
 }
 
-resource "aws_iam_role_policy" "lambda_policy" {
+resource "aws_iam_policy" "lambda_policy" {
   name = "lambda_policy"
-  role = aws_iam_role.lambda_role.id
-
   policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      },
-    ]
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    }]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
 resource "aws_lambda_function" "incident_lambda" {
-  filename         = "lambda_function_payload.zip"
   function_name    = "incidentResponseHandler"
-  role             = aws_iam_role.lambda_role.arn
-  handler          = "incident_detector.log_incident"
+  handler          = "incident_detector.lambda_handler"
   runtime          = "python3.10"
-
+  role             = aws_iam_role.lambda_exec_role.arn
+  filename         = "lambda_function_payload.zip"
   source_code_hash = filebase64sha256("lambda_function_payload.zip")
-
-  environment {
-    variables = {
-      LOG_GROUP_NAME  = aws_cloudwatch_log_group.incident_log_group.name
-      LOG_STREAM_NAME = aws_cloudwatch_log_stream.incident_log_stream.name
-      AWS_REGION      = "us-west-2"
-    }
-  }
 }
 
 resource "aws_cloudwatch_event_rule" "every_minute" {
-  name        = "every_minute"
-  description = "Fires every minute"
+  name                = "every_minute"
   schedule_expression = "rate(1 minute)"
 }
 
@@ -80,7 +67,7 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
   arn       = aws_lambda_function.incident_lambda.arn
 }
 
-resource "aws_lambda_permission" "allow_cloudwatch" {
+resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.incident_lambda.function_name

@@ -7,5 +7,5 @@ output "log_stream_name" {
 }
 
 output "lambda_function_name" {
-  value = aws_lambda_function.incident_detector.function_name
+  value = aws_lambda_function.incident_lambda.function_name
 }
