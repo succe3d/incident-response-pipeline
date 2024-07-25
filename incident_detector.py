@@ -1,49 +1,53 @@
-import boto3
-import time
-import json
+provider "aws" {
+  region = "us-west-2"
+}
 
-# Initialize a session using Amazon CloudWatch
-client = boto3.client('logs')
+resource "aws_cloudwatch_log_group" "incident_log_group" {
+  name = "incident-log-group"
+  retention_in_days = 14
+}
 
-# CloudWatch Log group name
-log_group_name = '/aws/lambda/incident_logs'
+resource "aws_cloudwatch_log_stream" "incident_log_stream" {
+  name           = "incident-log-stream"
+  log_group_name = aws_cloudwatch_log_group.incident_log_group.name
+}
 
-# Specify your AWS region
-region = 'us-west-2'
+resource "aws_iam_role" "lambda_role" {
+  name = "incident_detector_lambda_role"
 
-client = boto3.client('logs', region_name=region)
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
 
-def log_incident():
-    response = client.put_log_events(
-        logGroupName='your-log-group',
-        logStreamName='your-log-stream',
-        logEvents=[
-            {
-                'timestamp': int(time.time() * 1000),
-                'message': 'Incident detected!'
-            },
-        ],
-    )
-    print(response)
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
 
-# Function to simulate incident detection
-def log_incident():
-    timestamp = int(time.time() * 1000)
-    message = {
-        'timestamp': timestamp,
-        'message': 'ALERT: Security incident detected'
+resource "aws_lambda_function" "incident_detector" {
+  function_name = "incident_detector"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "incident_detector.lambda_handler"
+  runtime       = "python3.10"
+
+  filename         = "${path.module}/incident_detector.zip"
+  source_code_hash = filebase64sha256("${path.module}/incident_detector.zip")
+
+  environment {
+    variables = {
+      LOG_GROUP_NAME  = aws_cloudwatch_log_group.incident_log_group.name
+      LOG_STREAM_NAME = aws_cloudwatch_log_stream.incident_log_stream.name
     }
-    response = client.put_log_events(
-        logGroupName=log_group_name,
-        logStreamName='incident_stream',
-        logEvents=[
-            {
-                'timestamp': timestamp,
-                'message': json.dumps(message)
-            },
-        ]
-    )
-    print(response)
-
-if __name__ == "__main__":
-    log_incident()
+  }
+}
