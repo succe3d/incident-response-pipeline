@@ -1,31 +1,49 @@
 import boto3
-import time
 import json
+import datetime
 
-# Initialize a session using Amazon CloudWatch
-client = boto3.client('logs')
 
-# CloudWatch Log group name
-log_group_name = '/aws/lambda/incident_logs'
+def create_log_group_and_stream(client, log_group_name, log_stream_name):
+    try:
+        client.create_log_group(logGroupName=log_group_name)
+        print(f'Log group {log_group_name} created.')
+    except client.exceptions.ResourceAlreadyExistsException:
+        print(f'Log group {log_group_name} already exists.')
 
-# Function to simulate incident detection
+    try:
+        client.create_log_stream(logGroupName=log_group_name, logStreamName=log_stream_name)
+        print(f'Log stream {log_stream_name} created.')
+    except client.exceptions.ResourceAlreadyExistsException:
+        print(f'Log stream {log_stream_name} already exists.')
+
+
 def log_incident():
-    timestamp = int(time.time() * 1000)
+    client = boto3.client('logs', region_name='us-west-2')  # Specify the region here
+
+    log_group_name = 'incident-response-log-group'
+    log_stream_name = 'incident-response-log-stream'
+
+    create_log_group_and_stream(client, log_group_name, log_stream_name)
+
+    timestamp = int(datetime.datetime.now().timestamp() * 1000)
     message = {
-        'timestamp': timestamp,
-        'message': 'ALERT: Security incident detected'
+        'incident': 'Sample incident',
+        'timestamp': str(datetime.datetime.now())
     }
+
     response = client.put_log_events(
         logGroupName=log_group_name,
-        logStreamName='incident_stream',
+        logStreamName=log_stream_name,
         logEvents=[
             {
                 'timestamp': timestamp,
                 'message': json.dumps(message)
-            },
+            }
         ]
     )
+
     print(response)
+
 
 if __name__ == "__main__":
     log_incident()
