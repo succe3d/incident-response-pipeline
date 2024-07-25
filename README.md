@@ -1,3 +1,3 @@
-# incident-response-pipeline
+# Detection and Incident Response Pipeline
 
 STep,,
