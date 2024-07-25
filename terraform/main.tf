@@ -2,29 +2,18 @@ provider "aws" {
   region = "us-west-2"
 }
 
-resource "aws_s3_bucket" "incident_logs" {
-  bucket = "your-bucket-name"
+resource "aws_cloudwatch_log_group" "incident_log_group" {
+  name = "incident-log-group"
+  retention_in_days = 14
 }
 
-resource "aws_cloudwatch_log_group" "incident_logs" {
-  name = "/aws/lambda/incident_logs"
+resource "aws_cloudwatch_log_stream" "incident_log_stream" {
+  name           = "incident-log-stream"
+  log_group_name = aws_cloudwatch_log_group.incident_log_group.name
 }
 
-resource "aws_sns_topic" "incident_response" {
-  name = "IncidentResponseTopic"
-}
-
-resource "aws_lambda_function" "incident_handler" {
-  filename         = "lambda.zip"
-  function_name    = "incidentHandler"
-  role             = aws_iam_role.lambda_exec.arn
-  handler          = "lambda_function.lambda_handler"
-  source_code_hash = filebase64sha256("lambda.zip")
-  runtime          = "python3.8"
-}
-
-resource "aws_iam_role" "lambda_exec" {
-  name = "lambda_exec_role"
+resource "aws_iam_role" "lambda_role" {
+  name = "incident_detector_lambda_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -41,27 +30,24 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-resource "aws_iam_role_policy" "lambda_exec_policy" {
-  name   = "lambda_exec_policy"
-  role   = aws_iam_role.lambda_exec.id
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      },
-      {
-        Action = "sns:Publish"
-        Effect = "Allow"
-        Resource = "arn:aws:sns:us-west-2:123456789012:IncidentResponseTopic"
-      },
-    ]
-  })
+resource "aws_lambda_function" "incident_detector" {
+  function_name = "incident_detector"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "incident_detector.lambda_handler"
+  runtime       = "python3.10"
+
+  filename         = "${path.module}/incident_detector.zip"
+  source_code_hash = filebase64sha256("${path.module}/incident_detector.zip")
+
+  environment {
+    variables = {
+      LOG_GROUP_NAME  = aws_cloudwatch_log_group.incident_log_group.name
+      LOG_STREAM_NAME = aws_cloudwatch_log_stream.incident_log_stream.name
+    }
+  }
 }
