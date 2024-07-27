@@ -31,12 +31,12 @@ jobs:
       run: |
         ls -al # List files in the current directory
         zip lambda_function_payload.zip incident_detector.py
-      working-directory: ./terraform/incident_detector.py
+      working-directory: ./terraform # Change to the directory containing incident_detector.py
 
     - name: Configure AWS credentials
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         mkdir -p ~/.aws
         echo "[default]" > ~/.aws/credentials
@@ -52,16 +52,6 @@ jobs:
         AWS_DEFAULT_REGION: us-east-2
       run: |
         aws s3 cp terraform/lambda_function_payload.zip s3://incident-response-pipeline-bucket/lambda_function_payload.zip
-
-    - name: Deploy with Terraform
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: us-east-2
-      run: |
-        terraform init
-        terraform apply -auto-approve
-      working-directory: ./terraform
 
     - name: Run incident detector script
       run: |
