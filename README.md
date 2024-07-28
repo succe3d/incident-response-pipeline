@@ -91,7 +91,7 @@ The objective of this project is to understand the intricacies of CI/CD pipeline
    - Add your AWS credentials as secrets in the GitHub repository settings (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`).
 
 4. **Create GitHub Actions Workflow:**
-   - Define a workflow in `.github/workflows/deploy.yml` to automate the deployment process using GitHub Actions.
+   - Define a workflow in `.github/workflows/main.yml` to automate the deployment process using GitHub Actions.
 
 ### 5. Verify Deployment
 
