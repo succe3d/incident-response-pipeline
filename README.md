@@ -112,6 +112,17 @@ The objective of this project is to understand the intricacies of CI/CD pipeline
 
 The project successfully demonstrates the setup and execution of an automated incident detection and response pipeline using AWS resources and GitHub Actions for CI/CD. Through this project, we explored the use of Infrastructure as Code (IaC) with Terraform, automated deployments with GitHub Actions, and incident logging with AWS CloudWatch. This hands-on experience provides valuable insights into the workings of CI/CD pipelines and the implementation of detection and response systems in the cloud.
 
+- **GitHub Actions Workflow**: Automates the deployment process by triggering on code changes.
+  - **Triggers**: Code push events.
+  - **Steps**: Checkout code, configure AWS credentials, and run Terraform commands to deploy resources.
+
+- **AWS Resources**:
+  - **CloudWatch Log Group**: Stores logs for detected incidents.
+  - **Log Stream**: Individual stream within the log group for detailed logs.
+  - **Lambda Function**: Executes the incident detection script.
+  - **CloudWatch Event Rule**: Triggers the Lambda function based on specific events or schedules.
+ 
+    
 By completing this project, we gained a deeper understanding of:
 - Configuring AWS resources for automated incident detection.
 - Implementing Infrastructure as Code (IaC) to manage cloud resources.
