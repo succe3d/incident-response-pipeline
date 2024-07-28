@@ -4,7 +4,7 @@
 
 ## Objective
 
-The objective of this project is to understand the intricacies of CI/CD pipelines and how to create a detection and response system using AWS resources and GitHub Actions. This project demonstrates the process of setting up automated incident detection, logging incidents to CloudWatch Logs, and deploying resources using Infrastructure as Code (IaC) with Terraform. Through this project, we aim to:
+The objective of this project is to understand the intricacies of CI/CD pipelines and how to create a detection and response system using AWS resources and GitHub Actions. This project demonstrates the process of setting up automated incident detection, logging incidents to CloudWatch Logs, and deploying resources using Infrastructure as Code (IaC) with Terraform. Through this project, the goal is to:
 - Gain hands-on experience with AWS services.
 - Learn how to automate deployments using GitHub Actions.
 - Understand the integration of Terraform for IaC.
