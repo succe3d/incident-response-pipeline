@@ -44,7 +44,7 @@ The objective of this project is to understand the intricacies of CI/CD pipeline
 ### 2. Create the Python Script for Incident Detection
 
 1. **Write the Python Script:**
-   - Create a `incident_detector.py` script with the following structure:
+   - Create a [incident_detector.py](https://github.com/succe3d/incident-response-pipeline/blob/main/terraform/incident_detector.py) script with the following structure:
      - Import necessary libraries.
      - Create a function to simulate incident detection.
      - Log the detected incidents to CloudWatch Logs.
@@ -65,7 +65,7 @@ The objective of this project is to understand the intricacies of CI/CD pipeline
      ```
 
 2. **Create Terraform Files:**
-   - Create `main.tf` and `outputs.tf` files with the following configurations:
+   - Create [main.tf](https://github.com/succe3d/incident-response-pipeline/blob/main/terraform/main.tf) and [outputs.tf](https://github.com/succe3d/incident-response-pipeline/blob/main/terraform/outputs.tf) files with the following configurations:
      - Define AWS provider configuration.
      - Define resources such as CloudWatch Log Group, Lambda Function, and CloudWatch Event Rule.
 
@@ -101,9 +101,10 @@ The objective of this project is to understand the intricacies of CI/CD pipeline
 2. **Check AWS Management Console:**
    - Log in to the AWS Management Console and navigate to the CloudWatch service to verify the creation of resources such as:
      - CloudWatch Log Group
-     - Log Stream
      - Lambda Function
      - CloudWatch Event Rule
+     - Log Stream
+     ![image](https://github.com/user-attachments/assets/571af944-2796-485d-bcdf-559666b30aa0)
 
 3. **Verify CloudWatch Logs:**
    - Navigate to CloudWatch Logs and check for detailed incident logs in the specified log stream. The logs should contain detailed information about the incidents detected.
