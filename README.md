@@ -104,10 +104,10 @@ The objective of this project is to understand the intricacies of CI/CD pipeline
      - Lambda Function
      - CloudWatch Event Rule
      - Log Stream
-     ![image](https://github.com/user-attachments/assets/571af944-2796-485d-bcdf-559666b30aa0)
 
 3. **Verify CloudWatch Logs:**
    - Navigate to CloudWatch Logs and check for detailed incident logs in the specified log stream. The logs should contain detailed information about the incidents detected.
+     ![image](https://github.com/user-attachments/assets/571af944-2796-485d-bcdf-559666b30aa0)
  
 ## Conclusion
 
